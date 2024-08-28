@@ -296,23 +296,18 @@ long LinuxParser::UpTime(int pid) {
   string line;
   std::ifstream stream(kProcDirectory + to_string(pid) + kStatFilename);
   long value{0};  
-  // long start_time{0};
   if (stream.is_open()) {
     std::getline(stream, line);
     std::istringstream linestream(line);
     int count{1};
 
     while (getline(linestream, word, ' ')) {
-      if (count == 21) {
+      if (count == 22) {
         value = LinuxParser::UpTime() - stol(word) / sysconf(_SC_CLK_TCK);
         return value;
       }
-      // if (count == 21) {
-      //   start_time = stol(word) / sysconf(_SC_CLK_TCK);
-      // }
       count++;
     }
   }
   return value;
 }
-
