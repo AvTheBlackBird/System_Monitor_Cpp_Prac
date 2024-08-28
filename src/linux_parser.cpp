@@ -153,8 +153,8 @@ long LinuxParser::IdleJiffies() {
   }
 
 // TODO: Read and return CPU utilization
-vector<long> LinuxParser::CpuUtilization(int pid) { 
-  vector<long> cpuValues{};
+vector<float> LinuxParser::CpuUtilization(int pid) { 
+  vector<float> cpuValues{};
   string line;
   long time = 0;
   string value;
@@ -292,22 +292,23 @@ string LinuxParser::User(int pid) {
 // TODO: Read and return the uptime of a process
 // REMOVE: [[maybe_unused]] once you define the function
 long LinuxParser::UpTime(int pid) { 
+  string word;
   string line;
-  long uptime;
-  long value;
-  std::ifstream filestream(kProcDirectory + "/" + std::to_string(pid) + kStatFilename);
-  if (filestream.is_open()) {
-    while (std::getline(filestream, line)) {
-      std::istringstream linestream(line);
-      for (int i = 1; i <= kStarttime_; i++) {
-        linestream >> value;
-        // read the time when process started - starttime #22
-        if (i == kStarttime_) {
-          // read the starttime value in clock ticks and convert to seconds
-          // devide by clock ticks per second
-          uptime = value / sysconf(_SC_CLK_TCK);
-          return uptime;
+  std::ifstream stream(kProcDirectory + to_string(pid) + kStatFilename);
+  long value{0};  
+  if (stream.is_open()) {
+    std::getline(stream, line);
+    std::istringstream linestream(line);
+    int count{1};
+
+    while (getline(linestream, word, ' ')) {
+      if (count == 22) {
+        value = stol(word) / sysconf(_SC_CLK_TCK);
+        return value;
       }
+      count++;
     }
-  }}
-  return  uptime; }
+  }
+  return value;
+}
+
